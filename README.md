@@ -32,11 +32,15 @@ This uses datasets from https://tatoeba.org/en (Not included)
 
 
 #### 🏆 GOAL:
-- To help somewhat with the language learning process.
-- To provide a chunk of words to try and memorize, or to eventually help with conjugation.
+- To help somewhat with the language learning process
+- To provide a chunk of words to try and memorize, or to eventually help with conjugation
 - Hope to add options to narrow down words, to see conjugated forms of the words, or different gendered versions of words. (This often really hard to find online)
 - Maybe provide a way to track which words are known to the user, showing the words / sentences less frequently if already known
-- Be a challenge to create in python, that is fun to do.
+- Rank sentences, based on how many times the popular words Matched per sentence
+- Improve error handling, add more try/catches when things fail
+- Hoping to optimise more, might be better way to do searches or match words
+- Add some level of UI (maybe more web-based similar to automatic 1111 method)
+- Be a challenge to create in python, that is fun to do
 
 
 #### 💣 To note 💣
