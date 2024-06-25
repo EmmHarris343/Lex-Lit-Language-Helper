@@ -1,4 +1,4 @@
-## TL;DR
+## 🗯️ TL;DR
 
 For now - Take common words found in books / films. To provide sentences to help in language learning (In my Case, FR)
 
@@ -18,7 +18,20 @@ This uses datasets from https://tatoeba.org/en (Not included)
 - To provide a list of sentences which the words will be searched through
 - This site also has datasets with translations of these sentences in English (Later I may try and leverage this as well)
 
-GOAL:
+### 🛠️ Howto Use (Ish):
+ - [X] Download a sentence set from https://tatoeba.org/en
+ - [X] Download the word list from http://www.lexique.org/
+ - [X] Rename to match what's the names in the file open (Will change later to be easier)
+ - [X] Open read_both.py adjust values in init to speed up, or increase the words / sentences found or matched
+ - [X] run `python3 read_both.py`
+ - [x] Hope windows doesn't break it somehow (Was built on linux)
+
+
+
+
+
+
+#### 🏆 GOAL:
 - To help somewhat with the language learning process.
 - To provide a chunk of words to try and memorize, or to eventually help with conjugation.
 - Hope to add options to narrow down words, to see conjugated forms of the words, or different gendered versions of words. (This often really hard to find online)
@@ -26,7 +39,8 @@ GOAL:
 - Be a challenge to create in python, that is fun to do.
 
 
-To note:
+#### 💣 To note 💣
+
 - This is entirely a side project, not intended for people to use in this state
 - Might be be useful for somebody out there, and they could get it working
 - Code is very much so alpha purely testing state
