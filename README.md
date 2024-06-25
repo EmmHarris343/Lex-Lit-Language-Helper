@@ -13,6 +13,7 @@ This uses lexicons / datasets from: http://www.lexique.org/ (Not included)
 - To find which words are most commonly seen
 - This dataset includes very useful data, including the gender of the word (Romantic languages), the infinitive version of the word, if its a noun / verb etc.
 - Also includes some pronounciation data, and other useful data I hope to use later.
+  
 This uses datasets from https://tatoeba.org/en (Not included)
 - To provide a list of sentences which the words will be searched through
 - This site also has datasets with translations of these sentences in English (Later I may try and leverage this as well)
