@@ -1,0 +1,16 @@
+June 29th:
+- split up functions to make code cleaner
+- added function that will save the json file
+- changed around a few variable names to make more clear
+- seeing how each sentence could be broken into it's own subfunction. Want to think about ways this could be done threaded, maybe clustered (mostly for fun)
+
+
+
+
+June 28th:
+change how generally functioned:
+- instead of printing everything, saves the words into list
+- instead of only using 1 word and no details. Assigns multiple words to a single sentence, giving extra details of those words
+- Added a hacked together percentage counter that prints to console
+- added counter for how long each function takes (The small ones can likely be removed becaues they are so quick)
+- could easily be changed to save output to a json file

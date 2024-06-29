@@ -1,9 +1,10 @@
 import csv
 from datetime import datetime
 import time
+import sys
 import re # Regex bleh bleh
 import numpy as np
-
+import json
 
 from colorama import init, Fore, Back, Style
 
@@ -11,21 +12,26 @@ class fr_words():
     def __init__(self) -> None:
         ## Simple configurations:
         self.freq_threshold = 100                       # Min frequence *score words must be to be added to list
-        self.max_lex_word = 500                         # when reached, stops finding words from the lexicon dataset
-        self.max_found_words = 1000                     # when reached, stop searching (How many matched words found in sentences)
-        self.max_found_sentences = 100000                 # When reached, stop searching (How many sentences with matched words)
-        self.limit_sentence_search = 300000              # mostly for testing. Don't go through FULL list of sentences. Limit for speed.
+        self.max_lex_word = 500                         # How many words common words to use
+        self.max_found_words = 50                       # (NOT USED RIGHT NOW) when reached, stop searching (How many matched words found in sentences)
+        self.max_found_sentences = 150000                 # When reached, stop searching (How many sentences with matched words)
+        self.limit_sentence_search = 200000              # mostly for testing. Don't go through FULL list of sentences. Limit for speed.
         self.excluded_word_list = ['a', 'ai', 'ce', 'de', 'dans']
         
         ## Additional configurations:
         self.lexi_dtst_word_filename = "fr_lexique-383-.tsv"      ## configure for .env to remove these being hard-coded
         self.sentence_dtst_filename = "fr_sentences.tsv"
+        self.json_output_file = 'saved_sentences.json'
 
-        self.detailed_word_list = None
-        self.reduce_detail_word_list = None
-        self.simplifed_word_list = None
+        self.save_output = 1        ## 0 no; 1 yes
 
-        self.sentence_saved = None      ## List of sentences saved with found words
+
+        self.full_detail_word_list = None
+        self.simplifed_word_list = None                 ## Only word
+        self.trim_detail_word_list = None
+
+
+        self.sentence_matched_words = None              ## List of sentences with found words
 
 
 
@@ -49,23 +55,31 @@ class fr_words():
 
         ## Trim details of words
         fnct_dt_start = datetime.now()
-        self.reduce_detail_wordlist(self.detailed_word_list)
+        self.trim_details_words(self.full_detail_word_list)
         fnct_dt_end = datetime.now()
         time_diff = fnct_dt_end - fnct_dt_start
         print(f'Function Trim Details Took: {time_diff.total_seconds()} sec')
 
 
         ## Run the slow function. 
-        if self.reduce_detail_word_list is not None and len(self.reduce_detail_word_list) > 1:            
+        if self.trim_detail_word_list is not None and len(self.trim_detail_word_list) > 1:            
             fnct_dt_start= datetime.now()
-            self.find_sntcn_save(self.reduce_detail_word_list)  ## Function
+            self.match_words_sentence(self.trim_detail_word_list)  ## Function
             fnct_dt_end = datetime.now()
             time_diff = fnct_dt_end - fnct_dt_start
 
-            print(f'Function FindWords in sentence Took: {time_diff.total_seconds()} sec')
+            print(f'Function MatchWords in sentence Took: {time_diff.total_seconds()} sec')
             
+        if self.save_output == 1 and self.sentence_matched_words:
+            fnct_dt_start= datetime.now()
+            self.found_sentnce_save(self.sentence_matched_words)
+            fnct_dt_end = datetime.now()
+            fnct_dt_end = datetime.now()
+            time_diff = fnct_dt_end - fnct_dt_start
+            print(f'Function Save Output to Json Took: {time_diff.total_seconds()} sec')
 
-        #NORMAL MODE:
+
+        # Print out mode:
         #self.simplify_word_list()
         #if self.simplifed_word_list is not None and len(self.simplifed_word_list) > 1:
         #    self.test_wrdInSentence(self.simplifed_word_list) ## 
@@ -78,6 +92,13 @@ class fr_words():
         print(Fore.LIGHTGREEN_EX + "Woa - Appears to have reached end! ===:: Exiting, Bye!; Au-revoir ! ::===" + Fore.RESET)
         pass
 
+
+
+    '''
+    --- READ LEXIQUE --- 
+    Pull words based on frequency threshold from Word Lexique
+
+    '''
     def read_lex(self):
         print('::Beginning Function:: - Pull words from Lexique')
         arr_words = []      # Temp storage of found words
@@ -115,9 +136,11 @@ class fr_words():
             print(f'{len(ignored_words)} words already been seen and were not added to list.')
             print(f'Ignored words', ignored_words)
             print('::DONE::')
-            self.detailed_word_list = arr_words     ## Pass off from the temp arr_words to the easily accessable one.
+            self.full_detail_word_list = arr_words     ## Pass off from the temp arr_words to the easily accessable one.
   
-
+    '''
+    Simply Words, reduce words down to ONLY word with no other details
+    '''
 
     def simplify_word_list(self): 
         try:
@@ -130,8 +153,12 @@ class fr_words():
         except Exception as err:
             self.excption_handling(1, err, 'Failure when trying to simplify words list/ dict, Entry Missing? Type-Mismatch?')       ## [0-1: warn:err], [Message to say], [pass exception]
 
+    '''
+    Simple version, pull words from list. Match in Sentence print out highlighted words
 
-
+    Does not provide any aditional word details, will only match 1 distinct word per sentence
+    
+    '''
     def print_wrdInSentence(self, input_words):
         loop_count = 0
         found_cnt = 0
@@ -174,21 +201,25 @@ class fr_words():
                 loop_count +=1
         print(f'Finished running through sentence & words; Total sentences:{loop_count}')
 
-    ## Advanced (DO LATER!!)
-    # Look at the sentence, see if it matched two or more times - if yes, upgrade it's rank
 
-    # Each sentence should be ranked by how many times the word is seen in the phrase. 
-    # Print out a phrase for each word say 3 times. - But don't print out more than 3 at a time. 
-    # Maybe don't stop at only finding 3 sentences. Because if it matches more than 1 word. It should be ranked up.
-    ## POSSIBLY::
-    ## {"SentenceID": row[0], "MatchedWord": {"dernier", "depuis", "vue"}, "Sentence": "Je ne l'ai pas vue depuis le mois dernier."}
+    ### ENDED SIMPLE VERSION
+
+    
+    
+    
+    ### MORE COMPLICATED VERSION:
 
 
-    def reduce_detail_wordlist(self, wordlist):         ## Maybe call this Trim details (becaues it's not reducing it to nothing)
+    '''
+    Trim Details of words
+    Trims/ Reduces the details in the word list. Stripping out extra details not needed. IE Frequency points etc
+    '''
+
+    def trim_details_words(self, wordlist):         ## Maybe call this Trim details (becaues it's not reducing it to nothing)
         print(f'::Beginning Function:: Trim Wordlist details')
         try:
-            if self.reduce_detail_word_list is None:
-                self.reduce_detail_word_list = []
+            if self.trim_detail_word_list is None:
+                self.trim_detail_word_list = []
             for entry in wordlist:
                 isolate_word = entry.get('Word', 'NULL')        ## Strips down to more basic form.
                 sub_details = entry.get('Details')              ## Points to the Sub (Or nested) details in each Dict
@@ -200,24 +231,32 @@ class fr_words():
 
 
                 final_detail_wordlist = {"Word": isolate_word, "Genre": genre, "Infinitive": infinitive, "WordType": word_type}
-                self.reduce_detail_word_list.append(final_detail_wordlist)
+                self.trim_detail_word_list.append(final_detail_wordlist)
             print("::DONE::")
         except Exception as err:
-            self.excption_handling(1, err, 'Failure when trying to simplify words list/ dict, Entry Missing? Type-Mismatch?')       ## [0-1: warn:err], [Message to say], [pass exception]
+            self.excption_handling(1, err, 'Failure when trying to simplify words list/ dict, Entry Missing? Type-Mismatch?')       ## [0-1: err:warn], [Message to say], [pass exception]
 
 
+    '''
+    ::::Find/ Match Words in Sentences::::
+    Slowest --
+    1. Loop over each word in list
+    2. See if word exists in sentence
+    3. If yes:
+        1. Add characters around word in sentence, to allow for highlight later
+        2. Add entire diction of word, to the sentence
 
-    def find_sntcn_save(self, input_words):
-        print(f'::Beginning Function:: To Find words in sentences, and save :: Total words: {len(input_words)}')
+    '''
+    def match_words_sentence(self, input_words):
+        print(f'::Beginning Function:: Find words in sentences :: Total words: {len(input_words)}')
 
         sentence_loop_count = 0
+
         individual_found_words_count = 0
-
         found_sentence_with_words = 0
-        sentence_has_word = False
-        
-        working_sentence = None
 
+
+        sentence_results = None
         full_list_sentences = []
         
 
@@ -226,7 +265,7 @@ class fr_words():
         #     current_word = dict_words.get('Word', 'Null')       ## Not safe, doesn't check if word returned is valid.
         with open("fr_sentences.tsv") as fd:
             rd = csv.reader(fd, delimiter="\t", quotechar='"')
-            for sentence in rd:                
+            for sentence in rd:
                 # Interupt Checks:
                 if sentence_loop_count >= self.limit_sentence_search:
                     print(Fore.LIGHTYELLOW_EX + 'Reached max matched sentence search, exiting...' + Fore.RESET)
@@ -239,7 +278,7 @@ class fr_words():
                     break
 
                 # Progress updates:
-                interval = self.max_found_sentences // 4 ## double slash round down
+                interval = self.max_found_sentences // 4 ## double slash divide + round down
                 if found_sentence_with_words == interval:
                     print(Fore.LIGHTGREEN_EX + 'Process around 25%' + Fore.RESET)
                 if found_sentence_with_words == interval *2:
@@ -247,47 +286,23 @@ class fr_words():
                 if found_sentence_with_words == interval *3:
                     print(Fore.LIGHTGREEN_EX + 'Process around 75%' + Fore.RESET)                
 
+                # Run function to match input words in this specific sentence!
+                word_match = self.word_match_loop(sentence[2], input_words)
 
-                sentence_has_word = False
-                working_sentence = sentence[2] ## The same sentence might be updated multiple times with different words
-                found_words = []
-
-                ## Word Processing:
-
-                matched_word_count = 0          ## Reset how many words it found in sentence
-                for word_details in input_words:
-                    current_word = word_details.get('Word', 'Null')     # Pull just the word for now, out of the dictionary
-                    regx_word_pattern = re.compile(r'\b({0})\b'.format(re.escape(current_word)), flags=re.IGNORECASE)
-                    matched_word = regx_word_pattern.findall(working_sentence)
-                    if len(matched_word) > 0:
-                        sentence_has_word = True
-                        ##print('Think found')
-                        islate_word_pattern = r'(!!)\1(&&)'   
-                        added_chrcts = re.sub(regx_word_pattern, islate_word_pattern, working_sentence)      ## Add the speical characters around each word
-                        working_sentence = added_chrcts ## Just to be clear, set working sentence back to itself, to add more than 1 word
-                        ## Dict, of found words:
-                        found_words.append(word_details)
-                        individual_found_words_count += 1
-                        matched_word_count += 1
-
-                if sentence_has_word is True:
+                if word_match is not None:
+                    ## Has matched values
+                    individual_found_words_count += word_match[0]
                     found_sentence_with_words += 1
-
-
-                if matched_word_count > 0:          ## Don't add sentence to list, unless there was actually words in the sentence
-                    combine_stnc_words = {"Sentence": working_sentence, "WordDetails": found_words}
-                    full_list_sentences.append(combine_stnc_words)
-                    #print('Total Sentences with 1 or more Match Words so far? --:', len(full_list_sentences))
-            
+                    sentence_results = word_match[1]
+                if word_match is not None and sentence_results is not None:
+                    full_list_sentences.append(sentence_results)
+                
                 sentence_loop_count += 1
 
-        # ----- Finished ---------
-        #self.datetime_end = datetime.now()
-        #time_dif = self.datetime_end - self.datetime_start
-
-
-        #print(Fore.LIGHTBLUE_EX + f"Processed Finished at:{self.datetime_end}", Fore.RESET)
-        #print(Fore.LIGHTBLUE_EX + f"Processing time took: {time_dif.total_seconds()}", Fore.RESET)
+                    
+        
+        ## Has finished entire loop. Set local variables to more global ones
+        self.sentence_matched_words = full_list_sentences
 
         print('::DONE::')
         print(f'=================\
@@ -298,11 +313,50 @@ class fr_words():
               \n--- Used:{len(input_words)} common words in search \
               \n=================')
 
+    def word_match_loop(self, input_sentence, input_word_list: list):
+        found_words = []
+        found_count = 0
+        build_sentence_dict = None
+        obj_return = None
+        sentence_has_word = False
+        working_sentence = input_sentence
+
+        for word_details in input_word_list:
+            ##print('---DEBUG---', 'What is words???, Why is it finding it three times', word_details)
+            try:
+                current_word = word_details.get('Word', 'Null')     # Pull only the word, so it can search for it in the regex pattern
+            except Exception as err:
+                self.excption_handling(0, err, "Unable to pull data from Dict: Missing data? Wrong variable passed?")
+
+            regx_word_pattern = re.compile(r'\b({0})\b'.format(re.escape(current_word)), flags=re.IGNORECASE)
+            matched_word = regx_word_pattern.findall(working_sentence)
+            if len(matched_word) > 0:
+                sentence_has_word = True
+                islate_word_pattern = r'(!!)\1(&&)'
+                added_chrcts = re.sub(regx_word_pattern, islate_word_pattern, working_sentence)      ## Add the speical characters around each word
+                working_sentence = added_chrcts         ## Just to be clear, set working sentence back to itself, to add more than 1 word
+                found_words.append(word_details)        ## Add the entire word dictionary to sentence/ list
+                found_count += 1
+
+        if sentence_has_word is True:               ## Don't add sentence to list, unless there was actually words in the sentence
+            build_sentence_dict = {"Sentence": working_sentence, "WordDetails": found_words}
+            obj_return = [found_count, build_sentence_dict]
+
+        if len(found_words) > 0: return obj_return
+        else: return None
 
 
 
-    def found_sentnce_save(self, sentence, word, word_details):
-        print('Split this up later, so it is more easy to read later')
+
+    def found_sentnce_save(self, data_tosave: list):
+        print('::FUNCTION :: Save to Json')
+        try:
+            with open(self.json_output_file, 'w') as f:
+                json.dump(data_tosave, f, indent=4)
+        except Exception as err:
+            self.excption_handling(0, err, "Failure when trying to save output data to json file!")
+
+
 
 
 
@@ -331,11 +385,14 @@ class fr_words():
                     found_cnt += 1
                 loop_count +=1
 
-    def excption_handling(self, problem_type, excptn, message):
-        if problem_type == 1:
+    def excption_handling(self, problem_type: int, excptn: Exception, message: str):
+        if problem_type == 0:
             # Error
             print(Fore.LIGHTRED_EX + '-- ERORR -- Exception Occured -- \n' + Fore.RESET, f'Message: {message}\n', f'Exception: {excptn}')
-        if problem_type == 0:
+            #raise(excptn)
+            sys.exit(1)
+            
+        if problem_type == 1:
             # Warning
             print(Fore.LIGHTRED_EX + '-- Warning -- Exception Occured -- \n' + Fore.RESET, f'Encountered: {message}\n', f'Exception: {excptn}')
 
