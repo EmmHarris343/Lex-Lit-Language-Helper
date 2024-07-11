@@ -12,9 +12,9 @@ class fr_words():
     def __init__(self) -> None:
         ## Simple configurations:
         self.freq_threshold = 100                       # Min frequence *score words must be to be added to list
-        self.max_lex_word = 500                         # How many words common words to use
+        self.max_lex_word = 100                         # How many common words to use
         self.max_found_words = 50                       # (NOT USED RIGHT NOW) when reached, stop searching (How many matched words found in sentences)
-        self.max_found_sentences = 150000                 # When reached, stop searching (How many sentences with matched words)
+        self.max_found_sentences = 100000                 # When reached, stop searching (How many individual sentences with matched words)
         self.limit_sentence_search = 200000              # mostly for testing. Don't go through FULL list of sentences. Limit for speed.
         self.excluded_word_list = ['a', 'ai', 'ce', 'de', 'dans']
         
@@ -26,15 +26,14 @@ class fr_words():
         self.save_output = 1        ## 0 no; 1 yes
 
 
+        self.loaded_sentences:list[str] = None          ## Load all the sentences into memory. Makes it easier to thread/ split into processes
+
         self.full_detail_word_list = None
         self.simplifed_word_list = None                 ## Only word
         self.trim_detail_word_list = None
 
 
         self.sentence_matched_words = None              ## List of sentences with found words
-
-
-
         
         ## STARTUP BEGUN!
         print(Fore.LIGHTGREEN_EX + "Yo / Wesh - Startup!" + Fore.RESET)
@@ -46,42 +45,12 @@ class fr_words():
         print(Fore.LIGHTBLUE_EX + f"Processed Started at:{self.process_datetime_start}" + Fore.RESET)
 
 
-        ## Read/ Get words from Lexique
-        fnct_dt_start = datetime.now()
-        self.read_lex()
-        fnct_dt_end = datetime.now()
-        time_diff = fnct_dt_end - fnct_dt_start
-        print(f'Function Get Lexique took: {time_diff.total_seconds()} sec')
 
-        ## Trim details of words
-        fnct_dt_start = datetime.now()
-        self.trim_details_words(self.full_detail_word_list)
-        fnct_dt_end = datetime.now()
-        time_diff = fnct_dt_end - fnct_dt_start
-        print(f'Function Trim Details Took: {time_diff.total_seconds()} sec')
-
-
-        ## Run the slow function. 
-        if self.trim_detail_word_list is not None and len(self.trim_detail_word_list) > 1:            
-            fnct_dt_start= datetime.now()
-            self.match_words_sentence(self.trim_detail_word_list)  ## Function
-            fnct_dt_end = datetime.now()
-            time_diff = fnct_dt_end - fnct_dt_start
-
-            print(f'Function MatchWords in sentence Took: {time_diff.total_seconds()} sec')
-            
-        if self.save_output == 1 and self.sentence_matched_words:
-            fnct_dt_start= datetime.now()
-            self.found_sentnce_save(self.sentence_matched_words)
-            fnct_dt_end = datetime.now()
-            fnct_dt_end = datetime.now()
-            time_diff = fnct_dt_end - fnct_dt_start
-            print(f'Function Save Output to Json Took: {time_diff.total_seconds()} sec')
 
 
         # Print out mode:
-        #self.simplify_word_list()
-        #if self.simplifed_word_list is not None and len(self.simplifed_word_list) > 1:
+        # self.simplify_word_list()
+        # if self.simplifed_word_list is not None and len(self.simplifed_word_list) > 1:
         #    self.test_wrdInSentence(self.simplifed_word_list) ## 
 
 
@@ -94,12 +63,55 @@ class fr_words():
 
 
 
+
+
+
+    def full_detail_process(self):
+        ## Read/ Get words from Lexique
+        fnct_dt_start = datetime.now()
+        self.read_lex()
+        fnct_dt_end = datetime.now()
+        time_diff = fnct_dt_end - fnct_dt_start
+        print(f'Function Get Lexique took: {time_diff.total_seconds()} sec')
+
+        ## Transform: Trim details of words
+        fnct_dt_start = datetime.now()
+        self.trim_details_words(self.full_detail_word_list)
+        fnct_dt_end = datetime.now()
+        time_diff = fnct_dt_end - fnct_dt_start
+        print(f'Function Trim Details Took: {time_diff.total_seconds()} sec')
+
+        ## Load sentences from file
+        fnct_dt_start = datetime.now()
+        self.load_sentences_tsv()
+        fnct_dt_end = datetime.now()
+        time_diff = fnct_dt_end - fnct_dt_start
+        print(f'Function Load Sentences from TSV Took: {time_diff.total_seconds()} sec')
+
+        ## Core processing - Check if words exist into sentences
+        if self.trim_detail_word_list is not None and len(self.trim_detail_word_list) > 1:            
+            fnct_dt_start= datetime.now()
+            self.match_words_sentence(self.trim_detail_word_list)  ## Function
+            fnct_dt_end = datetime.now()
+            time_diff = fnct_dt_end - fnct_dt_start
+            print(f'Function MatchWords in sentence Took: {time_diff.total_seconds()} sec')
+
+        ## Save to Output file
+        if self.save_output == 1 and self.sentence_matched_words:
+            fnct_dt_start= datetime.now()
+            self.found_sentnce_save(self.sentence_matched_words)
+            fnct_dt_end = datetime.now()
+            fnct_dt_end = datetime.now()
+            time_diff = fnct_dt_end - fnct_dt_start
+            print(f'Function Save Output to Json Took: {time_diff.total_seconds()} sec')
+
+
     '''
     --- READ LEXIQUE --- 
     Pull words based on frequency threshold from Word Lexique
 
     '''
-    def read_lex(self):
+    def read_lex(self)-> None:
         print('::Beginning Function:: - Pull words from Lexique')
         arr_words = []      # Temp storage of found words
         word_seen = set()   # For duplicate checking
@@ -126,7 +138,7 @@ class fr_words():
                 if word not in self.excluded_word_list:     ## For the love of god who cares about "a" (have)
                     if float(frq_film) >= self.freq_threshold:
                         individual_word = {"Word": word, "Details":{"Genre": genre, "Infinitive": lemme, "WordType": cgram, "Other_WordType": cgram_all, "FreqFilm": frq_film, "FreqLivre": frq_livre}}
-                        if word not in word_seen:       
+                        if word not in word_seen:
                             word_seen.add(word)         ## (THIS STOPS ANY DUPLICATE WORDS) - It will supress the noun / verb / adj versions of words. (Not currently used, but be aware for future)
                             arr_words.append(individual_word)
                             found_count += 1
@@ -134,8 +146,7 @@ class fr_words():
                             #print('Already seen word, ignoring', word)
                             ignored_words.add(word)
             print(f'{len(ignored_words)} words already been seen and were not added to list.')
-            print(f'Ignored words', ignored_words)
-            print('::DONE::')
+            print(f'{Fore.LIGHTYELLOW_EX} - Notice - Ignored words', ignored_words, Fore.RESET)
             self.full_detail_word_list = arr_words     ## Pass off from the temp arr_words to the easily accessable one.
   
     '''
@@ -215,7 +226,7 @@ class fr_words():
     Trims/ Reduces the details in the word list. Stripping out extra details not needed. IE Frequency points etc
     '''
 
-    def trim_details_words(self, wordlist):         ## Maybe call this Trim details (becaues it's not reducing it to nothing)
+    def trim_details_words(self, wordlist: list[dict])-> None:         ## Maybe call this Trim details (becaues it's not reducing it to nothing)
         print(f'::Beginning Function:: Trim Wordlist details')
         try:
             if self.trim_detail_word_list is None:
@@ -232,7 +243,6 @@ class fr_words():
 
                 final_detail_wordlist = {"Word": isolate_word, "Genre": genre, "Infinitive": infinitive, "WordType": word_type}
                 self.trim_detail_word_list.append(final_detail_wordlist)
-            print("::DONE::")
         except Exception as err:
             self.excption_handling(1, err, 'Failure when trying to simplify words list/ dict, Entry Missing? Type-Mismatch?')       ## [0-1: err:warn], [Message to say], [pass exception]
 
@@ -247,79 +257,81 @@ class fr_words():
         2. Add entire diction of word, to the sentence
 
     '''
-    def match_words_sentence(self, input_words):
-        print(f'::Beginning Function:: Find words in sentences :: Total words: {len(input_words)}')
 
-        sentence_loop_count = 0
-
-        individual_found_words_count = 0
-        found_sentence_with_words = 0
-
-
-        sentence_results = None
-        full_list_sentences = []
-        
-
-        # for dict_words in input_words:
-        #     print(dict_words)
-        #     current_word = dict_words.get('Word', 'Null')       ## Not safe, doesn't check if word returned is valid.
+    def load_sentences_tsv(self) -> None:
+        print(f'::Beginning Function:: Load Sentences from TSV')
+        all_sentences:list[str] = []
         with open("fr_sentences.tsv") as fd:
             rd = csv.reader(fd, delimiter="\t", quotechar='"')
             for sentence in rd:
-                # Interupt Checks:
-                if sentence_loop_count >= self.limit_sentence_search:
-                    print(Fore.LIGHTYELLOW_EX + 'Reached max matched sentence search, exiting...' + Fore.RESET)
-                    break
-                # if individual_found_words_count >= self.max_found_words:
-                #     print(Fore.LIGHTYELLOW_EX, f'Reached max matched words {individual_found_words_count}, exiting...', Fore.RESET)
-                #     break
-                if found_sentence_with_words >= self.max_found_sentences:
-                    print(Fore.LIGHTYELLOW_EX + f'Reached max sentences with matched words {found_sentence_with_words}, exiting...' + Fore.RESET)
-                    break
+                all_sentences.append(sentence[2])
+        self.loaded_sentences = all_sentences
 
-                # Progress updates:
-                interval = self.max_found_sentences // 4 ## double slash divide + round down
-                if found_sentence_with_words == interval:
-                    print(Fore.LIGHTGREEN_EX + 'Process around 25%' + Fore.RESET)
-                if found_sentence_with_words == interval *2:
-                    print(Fore.LIGHTGREEN_EX + 'Process around 50%' + Fore.RESET)
-                if found_sentence_with_words == interval *3:
-                    print(Fore.LIGHTGREEN_EX + 'Process around 75%' + Fore.RESET)                
 
-                # Run function to match input words in this specific sentence!
-                word_match = self.word_match_loop(sentence[2], input_words)
+    def match_words_sentence(self, input_words):
+        print(f'::Beginning Function:: Find words in sentences :: Total words: {len(input_words)}')       
 
-                if word_match is not None:
-                    ## Has matched values
-                    individual_found_words_count += word_match[0]
-                    found_sentence_with_words += 1
-                    sentence_results = word_match[1]
-                if word_match is not None and sentence_results is not None:
-                    full_list_sentences.append(sentence_results)
-                
-                sentence_loop_count += 1
+        sentence_loop_count:int = 0
+        individual_found_words_count:int = 0
+        found_sentence_with_words:int = 0
+        sentence_results = None
+        full_list_sentences:list = []
 
-                    
-        
+        ## Pull sentence into variable, and run through ---- THIS MIGHT SPLIT UP into functions later!
+        local_sentences:list[str] = self.loaded_sentences
+        print(f'{Fore.LIGHTYELLOW_EX}--- Total Sentences available --- {len(local_sentences)}\
+               \n--- Sentence Limit --- {self.limit_sentence_search}\
+               \n--- If split in 4 threads... each thread would process: {self.limit_sentence_search // 4}\
+               \n--- Food for thought.. ---{Fore.RESET}')
+
+        for sentence_line in local_sentences:
+            # Interupt Checks:
+            if sentence_loop_count >= self.limit_sentence_search:
+                print(Fore.LIGHTYELLOW_EX + 'Reached max matched sentence search, exiting...' + Fore.RESET)
+                break
+            # if individual_found_words_count >= self.max_found_words:
+            #     print(Fore.LIGHTYELLOW_EX, f'Reached max matched words {individual_found_words_count}, exiting...', Fore.RESET)
+            #     break
+            if found_sentence_with_words >= self.max_found_sentences:
+                print(Fore.LIGHTYELLOW_EX + f'Reached max sentences with matched words {found_sentence_with_words}, exiting...' + Fore.RESET)
+                break
+
+            # Progress updates:
+            interval = self.max_found_sentences // 4 ## double slash divide + round down
+            if found_sentence_with_words == interval:
+                print(Fore.LIGHTGREEN_EX + 'Process around 25%' + Fore.RESET)
+            if found_sentence_with_words == interval *2:
+                print(Fore.LIGHTGREEN_EX + 'Process around 50%' + Fore.RESET)
+            if found_sentence_with_words == interval *3:
+                print(Fore.LIGHTGREEN_EX + 'Process around 75%' + Fore.RESET)                
+
+            # Run function to match input words in this specific sentence!
+            word_match: dict = self.word_match_loop(sentence_line, input_words)
+
+            if word_match is not None:
+                ## Has matched values
+                individual_found_words_count += word_match[0]
+                found_sentence_with_words += 1
+                sentence_results = word_match[1]
+            if word_match is not None and sentence_results is not None:
+                full_list_sentences.append(sentence_results)
+            
+            sentence_loop_count += 1
+
         ## Has finished entire loop. Set local variables to more global ones
         self.sentence_matched_words = full_list_sentences
+        send_stats = {"SentenceTotal": sentence_loop_count, "SentenceMatch": found_sentence_with_words,\
+                      "WordMatch": individual_found_words_count, "WordList": len(input_words)}
+        self.finished_stats(send_stats)
 
-        print('::DONE::')
-        print(f'=================\
-              \nStats: \
-              \n--- Processed:{sentence_loop_count} sentences. \
-              \n--- Found:{found_sentence_with_words} sentences with at least 1 word that matched. \
-              \n--- Matched:{individual_found_words_count} words total\
-              \n--- Used:{len(input_words)} common words in search \
-              \n=================')
 
-    def word_match_loop(self, input_sentence, input_word_list: list):
-        found_words = []
-        found_count = 0
-        build_sentence_dict = None
+    def word_match_loop(self, input_sentence: list[dict], input_word_list: list[dict]) -> list[int,dict]:
+        found_words:list = []
+        found_count:int = 0
+        build_sentence = None
         obj_return = None
-        sentence_has_word = False
-        working_sentence = input_sentence
+        sentence_has_word:bool = False
+        working_sentence:list[dict] = input_sentence
 
         for word_details in input_word_list:
             ##print('---DEBUG---', 'What is words???, Why is it finding it three times', word_details)
@@ -339,8 +351,8 @@ class fr_words():
                 found_count += 1
 
         if sentence_has_word is True:               ## Don't add sentence to list, unless there was actually words in the sentence
-            build_sentence_dict = {"Sentence": working_sentence, "WordDetails": found_words}
-            obj_return = [found_count, build_sentence_dict]
+            build_sentence:dict = {"Sentence": working_sentence, "WordDetails": found_words}
+            obj_return:list[int, dict] = [found_count, build_sentence]
 
         if len(found_words) > 0: return obj_return
         else: return None
@@ -348,8 +360,8 @@ class fr_words():
 
 
 
-    def found_sentnce_save(self, data_tosave: list):
-        print('::FUNCTION :: Save to Json')
+    def found_sentnce_save(self, data_tosave: list[dict]) -> None:
+        print(':: FUNCTION :: Save to Json')
         try:
             with open(self.json_output_file, 'w') as f:
                 json.dump(data_tosave, f, indent=4)
@@ -357,7 +369,18 @@ class fr_words():
             self.excption_handling(0, err, "Failure when trying to save output data to json file!")
 
 
-
+    def finished_stats(self, completion_stats: dict) -> None:
+        sentences_total = completion_stats.get('SentenceTotal', 'Null')
+        sentences_match = completion_stats.get('SentenceMatch', 'Null')
+        word_match = completion_stats.get('WordMatch', 'Null')
+        word_list = completion_stats.get('WordList', 'Null')
+        print(f'=================\
+              \nStats: \
+              \n--- Processed:{sentences_total} sentences. \
+              \n--- Found:{sentences_match} sentences with at least 1 word that matched. \
+              \n--- Matched:{word_match} words total\
+              \n--- Used:{word_list} common words in search \
+              \n=================')
 
 
 
@@ -385,7 +408,7 @@ class fr_words():
                     found_cnt += 1
                 loop_count +=1
 
-    def excption_handling(self, problem_type: int, excptn: Exception, message: str):
+    def excption_handling(self, problem_type: int, excptn: Exception, message: str) -> None:
         if problem_type == 0:
             # Error
             print(Fore.LIGHTRED_EX + '-- ERORR -- Exception Occured -- \n' + Fore.RESET, f'Message: {message}\n', f'Exception: {excptn}')
@@ -396,4 +419,8 @@ class fr_words():
             # Warning
             print(Fore.LIGHTRED_EX + '-- Warning -- Exception Occured -- \n' + Fore.RESET, f'Encountered: {message}\n', f'Exception: {excptn}')
 
-fr_words().__init__ 
+#fr_words().__init__ 
+
+
+if __name__ == '__main__':
+    fr_words().__init__ 
