@@ -16,7 +16,7 @@ class fr_words():
         self.max_found_words = 50                       # (NOT USED RIGHT NOW) when reached, stop searching (How many matched words found in sentences)
         self.max_found_sentences = 100000                 # When reached, stop searching (How many individual sentences with matched words)
         self.limit_sentence_search = 200000              # mostly for testing. Don't go through FULL list of sentences. Limit for speed.
-        self.excluded_word_list = ['a', 'ai', 'ce', 'de', 'dans']
+        self.excluded_word_list:list = ['a', 'ai', 'ce', 'de', 'dans']
         
         ## Additional configurations:
         self.lexi_dtst_word_filename = "fr_lexique-383-.tsv"      ## configure for .env to remove these being hard-coded
@@ -43,16 +43,6 @@ class fr_words():
         self.process_datetime_start = datetime.now()
         self.process_datetime_end = None
         print(Fore.LIGHTBLUE_EX + f"Processed Started at:{self.process_datetime_start}" + Fore.RESET)
-
-
-
-
-
-        # Print out mode:
-        # self.simplify_word_list()
-        # if self.simplifed_word_list is not None and len(self.simplifed_word_list) > 1:
-        #    self.test_wrdInSentence(self.simplifed_word_list) ## 
-
 
         self.process_datetime_end = datetime.now()
         process_time_diff = self.process_datetime_end - self.process_datetime_start
@@ -289,9 +279,6 @@ class fr_words():
             if sentence_loop_count >= self.limit_sentence_search:
                 print(Fore.LIGHTYELLOW_EX + 'Reached max matched sentence search, exiting...' + Fore.RESET)
                 break
-            # if individual_found_words_count >= self.max_found_words:
-            #     print(Fore.LIGHTYELLOW_EX, f'Reached max matched words {individual_found_words_count}, exiting...', Fore.RESET)
-            #     break
             if found_sentence_with_words >= self.max_found_sentences:
                 print(Fore.LIGHTYELLOW_EX + f'Reached max sentences with matched words {found_sentence_with_words}, exiting...' + Fore.RESET)
                 break
@@ -354,20 +341,8 @@ class fr_words():
             build_sentence:dict = {"Sentence": working_sentence, "WordDetails": found_words}
             obj_return:list[int, dict] = [found_count, build_sentence]
 
-        if len(found_words) > 0: return obj_return
+        if len(found_words) > 0: return obj_return      ## This likely can be squished into sentence has word 
         else: return None
-
-
-
-
-    def found_sentnce_save(self, data_tosave: list[dict]) -> None:
-        print(':: FUNCTION :: Save to Json')
-        try:
-            with open(self.json_output_file, 'w') as f:
-                json.dump(data_tosave, f, indent=4)
-        except Exception as err:
-            self.excption_handling(0, err, "Failure when trying to save output data to json file!")
-
 
     def finished_stats(self, completion_stats: dict) -> None:
         sentences_total = completion_stats.get('SentenceTotal', 'Null')
@@ -385,29 +360,6 @@ class fr_words():
 
 
 
-    def find_sentence_manually(self):
-        # Meant for mostly testing. 
-        # This matches badly, will find the word inside other words!
-        Max_Sentences = 10000
-        loop_count = 0
-        find_word = "vue"
-        found_max = 10
-        found_cnt = 0
-
-        with open("fr_sentences.tsv") as fd:
-            rd = csv.reader(fd, delimiter="\t", quotechar='"')
-            for row in rd:          ## Loop through sentences
-                if loop_count >= Max_Sentences:
-                    break
-                if found_cnt >= found_max:
-                    print(Fore.LIGHTYELLOW_EX, 'Reached max matched words, exiting.', Fore.RESET)
-                    break
-                if find_word in row[2]:
-                    hghlt_ = row[2].replace(find_word,  Fore.LIGHTMAGENTA_EX + find_word + Fore.RESET)
-                    print('Found --->', hghlt_)
-                    found_cnt += 1
-                loop_count +=1
-
     def excption_handling(self, problem_type: int, excptn: Exception, message: str) -> None:
         if problem_type == 0:
             # Error
@@ -419,8 +371,6 @@ class fr_words():
             # Warning
             print(Fore.LIGHTRED_EX + '-- Warning -- Exception Occured -- \n' + Fore.RESET, f'Encountered: {message}\n', f'Exception: {excptn}')
 
-#fr_words().__init__ 
-
 
 if __name__ == '__main__':
-    fr_words().__init__ 
+    fr_words().__init__
