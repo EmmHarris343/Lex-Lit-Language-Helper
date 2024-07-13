@@ -4,6 +4,8 @@
 from data_reader import data_tsv_read
 from data_lex_transform import LexTransform
 
+from app_conf import Configuration
+
 
 # Require Imports
 import os
@@ -15,34 +17,38 @@ class MainPipeline():
     
     def __init__(self):
         print('Initiating pipeline function')
-        self.full_detail_word_list = None
-        self.trim_detail_word_list = None
+
+        
         self.loaded_lexique = None
         self.loaded_sentences = None
         
 
-        # Sentencey and Lexique Load:
-        self.dir_path = os.path()
-        self.lexique_path = self.dir_path + '/fr_lexique-383-.tsv'      # Linux / (Maybe change for other OS)
-        self.sentence_path = self.dir_path + '/fr_sentences.tsv'        # Linux / (Maybe change for other OS)
-        
-        self.lexique_read_limit = 0                 # 0 = No limit; Otherwise limit how many rows it reads (mostly for testing, doesn't really speed things up)
-
-
-        ## Data transformation Info
-        # By Frequency:
-        self.lexique_search_by_freq:bool = True
-        self.frequency_limit_words = 400            # When searching by frequency, Limit how many found words. (10 Fast, 50 bit longer. 400+ takes a while)
-        self.frequency_threshold:float = 100        # 0.1 = Average, 100 = Very Common
-        self.freq_search_type = 0                   # 0 = Film / 1 = Livre
-        self.excluded_word_list = ['a', 'ai', 'ce', 'de', 'dans']
         
 
-        # By Keyword:
-        self.lexique_search_by_keyword:bool = False
-        self.lexique_search_keyword:str = 'chat'
-        self.lexique_keyword_type:int = 0           # 0 = Current Word / 1 = Infinitif Word
-        self.lexique_search_keyword_limit:int = 0   # 0 = no limit; Or limit how many found
+        # BELOW SETTINGS --> Moved to app_conf
+
+        # # Sentencey and Lexique Load:
+        # self.dir_path = os.path()
+        # self.lexique_path = self.dir_path + '/fr_lexique-383-.tsv'      # Linux / (Maybe change for other OS)
+        # self.sentence_path = self.dir_path + '/fr_sentences.tsv'        # Linux / (Maybe change for other OS)
+        
+        # self.lexique_read_limit = 0                 # 0 = No limit; Otherwise limit how many rows it reads (mostly for testing, doesn't really speed things up)
+
+
+        # ## Data transformation Info
+        # # By Frequency:
+        # self.lexique_search_by_freq:bool = True
+        # self.frequency_limit_words = 400            # When searching by frequency, Limit how many found words. (10 Fast, 50 bit longer. 400+ takes a while)
+        # self.frequency_threshold:float = 100        # 0.1 = Average, 100 = Very Common
+        # self.freq_search_type = 0                   # 0 = Film / 1 = Livre
+        # self.excluded_word_list = ['a', 'ai', 'ce', 'de', 'dans']
+        
+
+        # # By Keyword:
+        # self.lexique_search_by_keyword:bool = False
+        # self.lexique_search_keyword:str = 'chat'
+        # self.lexique_keyword_type:int = 0           # 0 = Current Word / 1 = Infinitif Word
+        # self.lexique_search_keyword_limit:int = 0   # 0 = no limit; Or limit how many found
 
 
         
@@ -51,7 +57,7 @@ class MainPipeline():
         
 
 
-    def _RUN(self):
+    def _RUN(self, mode:int = 0):
 
         # --- Load lexique + Sentences into variables / memory ---
         self.loaded_lexique = data_tsv_read.lexique_loader_tsv(

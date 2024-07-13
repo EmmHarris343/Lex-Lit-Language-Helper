@@ -1,3 +1,6 @@
+import json
+
+
 class write_json2:
 
     def save_to_output(self, data_tosave: list[dict]) -> None:
