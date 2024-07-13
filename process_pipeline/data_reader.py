@@ -13,7 +13,13 @@ class data_tsv_read():
 
 
     ## The reason for not just loading. Don't want to map each row / header. Easier to pull just each column thats wanted.
-    def lexique_loader_tsv(self, filename_path: str | bytes | os.PathLike, exclude_word: list = [], read_limit: int = 0) -> list[dict]:
+    def lexique_loader_tsv(
+            self,
+            filename_path: str | bytes | os.PathLike, 
+            exclude_word: list = [], 
+            read_limit: int = 0
+            ) -> list[dict]:
+        
         arr_words = []      # Temp storage of found words
         word_seen = set()   # For duplicate checking
 
@@ -24,7 +30,7 @@ class data_tsv_read():
                 word = row['ortho']                 
                 if read_limit != 0 and found_count >= read_limit:
                     break   # If limit reached, stop (For testing usually)
-                if word not in self.excluded_word_list:
+                if word not in exclude_word:
                     individual_dictline = {
                         "Word": row['ortho'],
                         "Details":{
@@ -44,7 +50,10 @@ class data_tsv_read():
     
 
 #### BACKUP OF THIS, INCASE I BREAK IT!
-    def lexique_loader_tsv_backup(self, filename_path: str | bytes | os.PathLike, read_limit: int = 0) -> list[dict]:      
+    def lexique_loader_tsv_backup(
+            self, filename_path: str | bytes | os.PathLike, 
+            read_limit: int = 0
+            ) -> list[dict]:      
         arr_words = []      # Temp storage of found words
         word_seen = set()   # For duplicate checking
 
