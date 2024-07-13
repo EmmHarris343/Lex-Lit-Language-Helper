@@ -14,3 +14,15 @@ change how generally functioned:
 - Added a hacked together percentage counter that prints to console
 - added counter for how long each function takes (The small ones can likely be removed becaues they are so quick)
 - could easily be changed to save output to a json file
+
+July 13:
+Huge changes:
+- structure change. Rearranged how everything Rearranged
+- added keyword search function
+- renamed functions how they were called and what they did
+- built classes to help break out what each part it
+- did reduce a lot of status logging. but likely isn't really needed.
+- began process of having CLI / how it would call / do things
+- built a single endpoint for configurations in app_conf / the class Configuration - Has potential to also load it's configuration from config files (like json)
+- still might like to build a basic UI. Make it easier to visualize / show data.
+- setup venv setup, default launch options.

@@ -21,24 +21,19 @@ This uses datasets from https://tatoeba.org/en (Not included)
 ### 🛠️ Howto Use (Ish):
  - [X] Download a sentence set from https://tatoeba.org/en
  - [X] Download the word list from http://www.lexique.org/
- - [X] Rename to match what's the names in the file open (Will change later to be easier)
- - [X] Open read_both.py adjust values in init to speed up, or increase the words / sentences found or matched
- - [X] run `python3 read_both.py`
+ - [X] Rename file names. Or change configuration naming (app_conf)
+ - [X] Adjust to your liking config settings in app_conf. Search mode, how much to process etc
+ - [X] run `python3 app.py` | use VS code debugger
  - [x] Hope windows doesn't break it somehow (Was built on linux)
-
-
-
 
 
 
 #### 🏆 GOAL:
 - To help somewhat with the language learning process
-- To provide a chunk of words to try and memorize, or to eventually help with conjugation
-- Hope to add options to narrow down words, to see conjugated forms of the words, or different gendered versions of words. (This often really hard to find online)
-- Maybe provide a way to track which words are known to the user, showing the words / sentences less frequently if already known
-- Rank sentences, based on how many times the popular words Matched per sentence
-- Improve error handling, add more try/catches when things fail
-- Hoping to optimise more, might be better way to do searches or match words
+- To help learn more words, understand the gender of word, or learn it's other forms.
+- Maybe build a user profile, tracks what's known and won't show the same words again and again.
+- [X] Build a word search option. Or search for infinitif word function
+- Speed improvements (maybe clustered stuff etc)
 - Add some level of UI (maybe more web-based similar to automatic 1111 method)
 - Be a challenge to create in python, that is fun to do
 
