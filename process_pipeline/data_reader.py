@@ -94,3 +94,6 @@ class data_tsv_read():
             for sentence in rd:
                 all_sentences.append(sentence[2])        
         return all_sentences
+    
+if __name__ == '__main__':
+    data_tsv_read().__init__()

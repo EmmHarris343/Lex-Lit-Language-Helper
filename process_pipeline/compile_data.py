@@ -7,23 +7,9 @@ from colorama import init, Fore, Back, Style
 
 class CompileData():
 
-
-        # "Sentence": "Combien d'(!!)amis(&&) proches est-ce que tu (!!)as(&&)\u202f?",
-        # "WordDetails": [
-        #     {
-        #         "Word": "amis",
-        #         "Genre": "m",
-        #         "Infinitive": "ami",
-        #         "WordType": "NOM"
-        #     },
-        #     {
-        #         "Word": "as",
-        #         "Genre": "",
-        #         "Infinitive": "avoir",
-        #         "WordType": "AUX"
-        #     }
-        # ]
-
+    def __init__(self):
+        self.placeholder = 0
+        pass
 
 
     def match_words_sentence(
@@ -35,7 +21,7 @@ class CompileData():
             ) -> list[dict]:        # Returns sentences with words in them
         
         sentence_results:dict = None
-        s_w_Final:list[dict] = []     #
+        s_w_Final:list[dict] = []
         sentence_count:int = 0
         word_count:int = 0
         word_sentence_count:int = 0
@@ -48,7 +34,7 @@ class CompileData():
                 break
 
             # Breakout to function --> 
-            word_search: dict = self.word_match_loop(_s, lex_words)
+            word_search = self.word_match_loop(_s, lex_words)
 
             if word_search is not None:
                 word_count += word_search[0]
@@ -100,3 +86,6 @@ class CompileData():
 
     def add_characters_sentence(self, working_sentence, characters, search_pattern):
         print('Do thing')
+
+if __name__ == '__main__':
+    CompileData()

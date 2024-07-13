@@ -4,6 +4,7 @@ class LexTransform:
 
     def __init__(self):
         self.Placeholder:bool = None
+        pass
 
 
     def refine_wordlex_frequency(
@@ -17,6 +18,7 @@ class LexTransform:
         found_count:int = 0
         word_frequency:float = None
         final_word_list:list[dict] = []
+
         try:
             for word_entry in raw_lexique:
                 isolate_word = word_entry.get('Word', 'NULL')
@@ -50,6 +52,8 @@ class LexTransform:
             final_word_list:list[dict] = []
             search_word:str = ''
 
+            
+
             for word_entry in raw_lexique:
                 isolate_word = word_entry.get('Word', 'NULL')
                 sub_details = word_entry.get('Details')
@@ -67,7 +71,6 @@ class LexTransform:
             return final_word_list
         except Exception as err:
             self.excption_handling(0, err, 'Failure when trying to refine Lexique List, Entry Missing? Type-Mismatch?')       ## [0-1: err:warn], [Message to say], [pass exception]
-
 
     ## It's already kind of small. Likely don't need to do, but could........... (All this does is remove frequency)
     def trim_details_words(self, wordlist: list[dict])-> list[dict]:
@@ -91,4 +94,5 @@ class LexTransform:
             self.excption_handling(1, err, 'Failure when trying to simplify words list/ dict, Entry Missing? Type-Mismatch?')       ## [0-1: err:warn], [Message to say], [pass exception]
 
 
- 
+if __name__ == '__main__':
+    LexTransform()

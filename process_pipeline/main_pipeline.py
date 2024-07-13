@@ -1,13 +1,15 @@
 # process_pipeline/main_pipeline.py
 
-# Modules
-from data_reader import data_tsv_read
-from data_lex_transform import LexTransform
-
+# Load extra Modules:
 from app_conf import Configuration
 
+# Pipeline Modules:
+from .data_reader import data_tsv_read
+from .data_lex_transform import LexTransform
+from .compile_data import CompileData
+from .output_save import write_json
 
-# Require Imports
+# Outside App Imports
 import os
 from datetime import datetime
 from colorama import init, Fore, Back, Style
@@ -18,80 +20,121 @@ class MainPipeline():
     def __init__(self):
         print('Initiating pipeline function')
 
+        conf = Configuration()      # Pull configs from class, and allow to be locally accessable
+        self.conf = conf
+
+        self.tsv_loader = data_tsv_read()
+        self.lex_transform = LexTransform()       
+        self.sentence_compilier = CompileData()
         
-        self.loaded_lexique = None
-        self.loaded_sentences = None
-        
+        self.loaded_lexique:list[dict] = None
+        self.loaded_sentences:list[str] = None
+        self.refined_lexique:list[dict] = None
+        self.final_compiled_sentences:list[dict] = None
 
-        
-
-        # BELOW SETTINGS --> Moved to app_conf
-
-        # # Sentencey and Lexique Load:
-        # self.dir_path = os.path()
-        # self.lexique_path = self.dir_path + '/fr_lexique-383-.tsv'      # Linux / (Maybe change for other OS)
-        # self.sentence_path = self.dir_path + '/fr_sentences.tsv'        # Linux / (Maybe change for other OS)
-        
-        # self.lexique_read_limit = 0                 # 0 = No limit; Otherwise limit how many rows it reads (mostly for testing, doesn't really speed things up)
-
-
-        # ## Data transformation Info
-        # # By Frequency:
-        # self.lexique_search_by_freq:bool = True
-        # self.frequency_limit_words = 400            # When searching by frequency, Limit how many found words. (10 Fast, 50 bit longer. 400+ takes a while)
-        # self.frequency_threshold:float = 100        # 0.1 = Average, 100 = Very Common
-        # self.freq_search_type = 0                   # 0 = Film / 1 = Livre
-        # self.excluded_word_list = ['a', 'ai', 'ce', 'de', 'dans']
-        
-
-        # # By Keyword:
-        # self.lexique_search_by_keyword:bool = False
-        # self.lexique_search_keyword:str = 'chat'
-        # self.lexique_keyword_type:int = 0           # 0 = Current Word / 1 = Infinitif Word
-        # self.lexique_search_keyword_limit:int = 0   # 0 = no limit; Or limit how many found
-
-
-        
-
-        
-        
-
-
+    '''
+    Entry point into Pipeline
+    '''        
     def _RUN(self, mode:int = 0):
+             
+        config = self.conf  # Add readability. to know what is being called.
 
-        # --- Load lexique + Sentences into variables / memory ---
-        self.loaded_lexique = data_tsv_read.lexique_loader_tsv(
-            self, 
-            self.lexique_path, 
-            self.excluded_word_list, 
-            self.lexique_read_limit
+        check = self.check_list(config.lexique_path, config.lexique_path, 0)
+        if check:
+            print('Pre-run Checklist, passed, continue with pipeline RUN')
+
+            ## Execute each code block
+            self.pipeline_load_data()
+            self.pipeline_refine_lexique()
+            self.pipeline_compile_lexique()
+            self.pipeline_save_output()
+
+    '''
+    Simple checklist. So far only checks files exist
+    '''
+    def check_list(self, sentence_path, lex_path, other)-> bool:
+        print('Running checklist..')
+        passed:bool = True # Default is true, if anything triggers a false flag, checklist will have failed.
+
+        if not os.path.isfile(sentence_path):
+            passed = False
+        if not os.path.isfile(lex_path):
+            passed = False
+        return passed
+
+    '''
+    TSV file loading
+    '''
+    def pipeline_load_data(self):
+        config = self.conf  # Add readability. to know what is being called.
+        load_lex = self.tsv_loader.lexique_loader_tsv(
+            config.lexique_path,
+            config.excluded_word_list,
+            config.lexique_read_limit,
             )
-        self.loaded_sentences = data_tsv_read.sentence_loader_tsv(
-            self, 
-            self.sentence_path
+        self.loaded_lexique = load_lex
+              
+        load_sentences = self.tsv_loader.sentence_loader_tsv(
+            config.sentence_path
             )
+        self.loaded_sentences = load_sentences
 
+    '''
+    Lexique Refinery
+    '''
+    def pipeline_refine_lexique(self):
+       # --- Refine Lexique Wordlist --- (Notice, if both are True, one will overwrite other!)
 
-
-        # --- Refine Lexique Wordlist ---
-        if self.lexique_search_by_freq is True:
-            self.full_detail_word_list = LexTransform.refine_wordlex_frequency(
-                self, 
-                self.loaded_lexique, 
-                self.frequency_threshold, 
-                self.freq_search_type, 
-                self.frequency_limit_words, 
-                self.excluded_word_list
-                )
-        if self.lexique_search_by_keyword is True:
-            self.full_detail_word_list = LexTransform.refine_wordlex_search(
-                self, 
+        config = self.conf  # Add readability. to know what is being called.
+        if config.lexique_search_by_freq is True:
+            print('Lexique Refinery; Mode Frequency')
+            refined_words = self.lex_transform.refine_wordlex_frequency(
                 self.loaded_lexique,
-                self.lexique_search_keyword,
-                self.lexique_keyword_type,
-                self.lexique_search_keyword_limit       ## Honestly feel, this is only going to find 10-30 words tops. Not like 7000. Likely not needed
+                config.frequency_threshold,
+                config.freq_search_type,
+                config.frequency_limit_words,
+                config.excluded_word_list
                 )
+            self.refined_lexique = refined_words
+            print('Finished refinery, total:', len(refined_words))
 
+            
+        if config.lexique_search_by_keyword is True:
+            print('Lexique Refinery; Mode Keyword')
+            refined_words = self.lex_transform.refine_wordlex_search(
+                self.loaded_lexique,
+                config.lexique_search_keyword,
+                config.lexique_keyword_type,
+                config.lexique_search_keyword_limit       ## Honestly feel, this is only going to find 10-30 words tops. Not like 7000. Likely not needed
+                )
+            self.refined_lexique = refined_words
+            print('Finished refinery, total:', len(refined_words))
+
+
+
+    '''
+    Compile sentences
+    '''
+    def pipeline_compile_lexique(self):
+        config = self.conf  # Add readability. to know what is being called.
+        if self.refined_lexique is not None:
+            # Make sure this isn't empty.
+            compiled_sentences = self.sentence_compilier.match_words_sentence(
+                self.refined_lexique, 
+                self.loaded_sentences,
+                config.sentence_loop_limit,
+                config.found_sentence_cap
+                )
+            self.final_compiled_sentences = compiled_sentences
+            print('Finished Compiling sentences, total:', len(compiled_sentences))
+            
+        
+
+    def pipeline_save_output(self):
+        print('Saving file output')
+        
+        # not best way to do this. but ONLY using function to save output.
+        write_json.save_to_output(self, self.final_compiled_sentences)
 
 
 
@@ -147,3 +190,7 @@ class MainPipeline():
 
 
         print('Main pipeline - Done. Maybe did something')
+
+
+if __name__ == '__main__':
+    MainPipeline()
