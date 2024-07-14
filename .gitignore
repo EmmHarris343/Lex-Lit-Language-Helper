@@ -1,3 +1,5 @@
+# Me:
+
 .env
 fr_lexique-383-.tsv
 fr_sentences_shrt.tsv
@@ -9,3 +11,64 @@ Sentence pairs in French-English - 2024-06-17.tsv
 Sml - Sentence pairs in French-English - 2024-06-17.tsv
 saved_sentences.json
 kafka_test.py
+
+old_files/
+other_tsv_files/
+
+
+
+## Boiler Plate:
+
+# cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyc
+
+
+# C extensions
+*.so
+
+# Distribution / packaging
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Rope
+.ropeproject
+
+# Django stuff:
+*.log
+*.pot
+
+# Sphinx documentation
+docs/_build/
