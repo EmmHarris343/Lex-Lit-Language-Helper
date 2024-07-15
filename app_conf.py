@@ -3,7 +3,7 @@ import os
 class Configuration:
 
     def __init__(self):
-        print('Configuration Startup')
+        print('Initializing App Configuration and Settings..')
 
         self.dir_path = os.curdir
         self.lexique_path = self.dir_path + '/fr_lexique-383-.tsv'      # Linux " / "(Maybe change for other OS)
@@ -22,7 +22,7 @@ class Configuration:
 
         # Pipeline Lexique Configs (Keyword Settings)
         self.lexique_search_by_keyword:bool = True
-        self.lexique_search_keyword:str = 'chat'
+        self.lexique_search_keyword:str = 'écrit'
         self.lexique_keyword_type:int = 0           # 0 = Current Word / 1 = Infinitif Word
         self.lexique_search_keyword_limit:int = 0   # 0 = no limit; Or limit how many found
 

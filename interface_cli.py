@@ -3,7 +3,7 @@
 class cli():
 
     def __init__(self) -> None:
-        print('CLI Interface - Initiated')
+        print('Initializing CLI')
 
     def mode_prompt(self) -> None:
         mode_select = input("\
@@ -12,6 +12,7 @@ class cli():
                             2. Word Search - Specify word (Normal Word Search)\n\
                             3. Word Search - Specify word (Infinitive Search)"
                             )
+        return mode_select
 
     def process_selection(self, selection):
         if selection == "1":
@@ -23,6 +24,9 @@ class cli():
     
         if selection != "1" and selection != "2" and selection != "3":
             print("Invalid input selected, please type only numbers '1','2', or '3'")
+
+
+
 
 
 if __name__ == '__main__':

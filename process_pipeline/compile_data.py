@@ -80,12 +80,5 @@ class CompileData():
             return obj_return
         else: return None
 
-
-    def pull_word_from_list(self, word_line ):
-        print('this one')
-
-    def add_characters_sentence(self, working_sentence, characters, search_pattern):
-        print('Do thing')
-
 if __name__ == '__main__':
     CompileData()

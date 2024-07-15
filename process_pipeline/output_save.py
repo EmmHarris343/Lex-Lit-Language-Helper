@@ -11,7 +11,6 @@ class write_json:
         
 
     def save_to_output(self, data_tosave: list[dict]) -> None:
-        print(':: FUNCTION :: Save to Json')
         try:
             with open(self.conf.json_output_file, 'w') as f:
                 json.dump(data_tosave, f, indent=4)

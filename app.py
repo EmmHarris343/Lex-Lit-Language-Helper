@@ -1,29 +1,40 @@
 # app.py
 
-import os
 from colorama import init, Fore, Back, Style
-
 
 import interface_cli
 import app_conf
 
 from process_pipeline.main_pipeline import MainPipeline
 
+from control_plane.ctrl_main import CtrlMain
+
 ##import read_both // OLD and bad. don't use.
 ##from process_pipeline.main_ import main_loop()
 
 class lex_lit:
     def __init__(self):
-        print('Initialization app..')
+        print('Initializing base App..')
+
+        # things to do first..
+
+        self.ctrl_plane = CtrlMain()
+
+
+
 
         ## All look good. Startup
         self.app_main()
 
+
+
     def app_main(self):
-        print('Startup')
         print(Fore.LIGHTGREEN_EX + "Yo / Wesh - Startup!" + Fore.RESET)
 
         MainPipeline()._RUN()
+
+
+        #self.ctrl_plane.main_ctrl()
 
 
 

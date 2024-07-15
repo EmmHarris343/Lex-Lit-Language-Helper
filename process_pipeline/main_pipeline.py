@@ -18,13 +18,13 @@ from colorama import init, Fore, Back, Style
 class MainPipeline():
     
     def __init__(self):
-        print('Initiating pipeline function')
+        print('Initializing Pipeline..')
 
         conf = Configuration()      # Pull configs from class, and allow to be locally accessable
         self.conf = conf
 
         self.tsv_loader = data_tsv_read()
-        self.lex_transform = LexTransform()       
+        self.lex_transform = LexTransform()
         self.sentence_compilier = CompileData()
         
         self.loaded_lexique:list[dict] = None
@@ -41,19 +41,21 @@ class MainPipeline():
 
         check = self.check_list(config.lexique_path, config.lexique_path, 0)
         if check:
-            print('Pre-run Checklist, passed, continue with pipeline RUN')
+            print('✓ Finished Pre-run Checklist - PASSED')
 
             ## Execute each code block
             self.pipeline_load_data()
             self.pipeline_refine_lexique()
             self.pipeline_compile_lexique()
             self.pipeline_save_output()
+        else:
+            print('--FAILED-- Checklist failed, please check files and extensions')
+            print('Pipeline _RUN Aborted')
 
     '''
     Simple checklist. So far only checks files exist
     '''
     def check_list(self, sentence_path, lex_path, other)-> bool:
-        print('Running checklist..')
         passed:bool = True # Default is true, if anything triggers a false flag, checklist will have failed.
 
         if not os.path.isfile(sentence_path):
@@ -87,7 +89,7 @@ class MainPipeline():
 
         config = self.conf  # Add readability. to know what is being called.
         if config.lexique_search_by_freq is True:
-            print('Lexique Refinery; Mode Frequency')
+            print(' - Lexique Refinery; Mode Frequency')
             refined_words = self.lex_transform.refine_wordlex_frequency(
                 self.loaded_lexique,
                 config.frequency_threshold,
@@ -96,11 +98,11 @@ class MainPipeline():
                 config.excluded_word_list
                 )
             self.refined_lexique = refined_words
-            print('Finished refinery, total:', len(refined_words))
+            print('✓ Finished Refinery, total words:', len(refined_words))
 
             
         if config.lexique_search_by_keyword is True:
-            print('Lexique Refinery; Mode Keyword')
+            print(' - Lexique Refinery; Mode Keyword')
             refined_words = self.lex_transform.refine_wordlex_search(
                 self.loaded_lexique,
                 config.lexique_search_keyword,
@@ -108,7 +110,7 @@ class MainPipeline():
                 config.lexique_search_keyword_limit       ## Honestly feel, this is only going to find 10-30 words tops. Not like 7000. Likely not needed
                 )
             self.refined_lexique = refined_words
-            print('Finished refinery, total:', len(refined_words))
+            print('✓ Finished Refinery, total words:', len(refined_words))
 
 
 
@@ -126,15 +128,14 @@ class MainPipeline():
                 config.found_sentence_cap
                 )
             self.final_compiled_sentences = compiled_sentences
-            print('Finished Compiling sentences, total:', len(compiled_sentences))
+            print('✓ Finished Compile, total sentences:', len(compiled_sentences))
             
         
 
     def pipeline_save_output(self):
-        print('Saving file output')
-        
         # not best way to do this. but ONLY using function to save output.
         write_json.save_to_output(self, self.final_compiled_sentences)
+        print('✓ Finished JsonWriter, saved output to file')
 
 
 
