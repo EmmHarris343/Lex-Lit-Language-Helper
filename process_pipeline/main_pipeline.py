@@ -35,22 +35,43 @@ class MainPipeline():
     '''
     Entry point into Pipeline
     '''        
-    def _RUN(self, mode:int = 0):
-             
+    def _RUN(self, cmd: int =0, keyword: str = ''):
+
         config = self.conf  # Add readability. to know what is being called.
 
-        check = self.check_list(config.lexique_path, config.lexique_path, 0)
-        if check:
-            print('✓ Finished Pre-run Checklist - PASSED')
+        try: 
+            if cmd == 1 and keyword != '':
+                check_passed = self.check_list(config.lexique_path, config.lexique_path, 0)
+                if check_passed:
+                    print('✓ Finished Pre-run Checklist - PASSED')
+                    self.pipeline_load_data()
+                    self.pipeline_refine_lexique(keyword)
+                    self.pipeline_compile_lexique()
+                    self.pipeline_save_output()
+                    print('This should.. end..')
 
-            ## Execute each code block
-            self.pipeline_load_data()
-            self.pipeline_refine_lexique()
-            self.pipeline_compile_lexique()
-            self.pipeline_save_output()
-        else:
-            print('--FAILED-- Checklist failed, please check files and extensions')
-            print('Pipeline _RUN Aborted')
+            else:
+                check_passed = self.check_list(config.lexique_path, config.lexique_path, 0)
+                if check_passed:
+                    print('✓ Finished Pre-run Checklist - PASSED')
+
+                    ## Execute each code block
+                    self.pipeline_load_data()
+                    self.pipeline_refine_lexique()
+                    self.pipeline_compile_lexique()
+                    self.pipeline_save_output()
+                else:
+                    print('--FAILED-- Checklist failed, please check files and extensions')
+                    print('Pipeline _RUN Aborted')
+                
+        except Exception as err:
+            print('Exception encountered Force closing the thread! Err:', err)
+        print('Why not ending...?')
+
+
+
+
+
 
     '''
     Simple checklist. So far only checks files exist
@@ -84,10 +105,16 @@ class MainPipeline():
     '''
     Lexique Refinery
     '''
-    def pipeline_refine_lexique(self):
+    def pipeline_refine_lexique(self, keyword:str =''):
        # --- Refine Lexique Wordlist --- (Notice, if both are True, one will overwrite other!)
 
         config = self.conf  # Add readability. to know what is being called.
+
+        if keyword != '':
+            config.lexique_search_keyword = keyword
+
+
+        
         if config.lexique_search_by_freq is True:
             print(' - Lexique Refinery; Mode Frequency')
             refined_words = self.lex_transform.refine_wordlex_frequency(

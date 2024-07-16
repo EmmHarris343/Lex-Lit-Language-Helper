@@ -7,8 +7,8 @@ class taskTEST:
     def main(self):
         print('QUE TASK test ---')
 
-
-    def doing_task(self, input_queue, output_queue) -> None:
+    ## Adding :Queue might break it.. sooo maybe remove that
+    def doing_task(self, input_queue: Queue, output_queue: Queue) -> None:
         while True:
             data_from_queue = input_queue.get()
 

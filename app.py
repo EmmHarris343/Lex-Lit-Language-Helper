@@ -19,7 +19,7 @@ class lex_lit:
         # things to do first..
 
         self.ctrl_plane = CtrlMain()
-
+        
 
 
 
@@ -31,10 +31,13 @@ class lex_lit:
     def app_main(self):
         print(Fore.LIGHTGREEN_EX + "Yo / Wesh - Startup!" + Fore.RESET)
 
-        MainPipeline()._RUN()
+        # MainPipeline()._RUN()
 
 
-        #self.ctrl_plane.main_ctrl()
+        self.ctrl_plane.main_ctrl()
+
+        self.ctrl_plane.another_ctrl()
+        
 
 
 
