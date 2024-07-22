@@ -38,32 +38,25 @@ class MainPipeline():
     def _RUN(self, cmd: int =0, keyword: str = ''):
 
         config = self.conf  # Add readability. to know what is being called.
-
         try: 
-            if cmd == 1 and keyword != '':
-                check_passed = self.check_list(config.lexique_path, config.lexique_path, 0)
-                if check_passed:
-                    print('✓ Finished Pre-run Checklist - PASSED')
+            check_passed = self.check_list(config.lexique_path, config.lexique_path, 0)
+            if check_passed:
+                print('✓ Finished Pre-run Checklist - PASSED')
+            else:
+                print('--FAILED-- Checklist failed, please check files and extensions')
+                print('Pipeline _RUN Aborted')
+
+            if check_passed and cmd == 1 and keyword != '':
                     self.pipeline_load_data()
                     self.pipeline_refine_lexique(keyword)
                     self.pipeline_compile_lexique()
                     self.pipeline_save_output()
-                    print('This should.. end..')
-
-            else:
-                check_passed = self.check_list(config.lexique_path, config.lexique_path, 0)
-                if check_passed:
-                    print('✓ Finished Pre-run Checklist - PASSED')
-
-                    ## Execute each code block
+            if check_passed and cmd == 0:
                     self.pipeline_load_data()
                     self.pipeline_refine_lexique()
                     self.pipeline_compile_lexique()
                     self.pipeline_save_output()
-                else:
-                    print('--FAILED-- Checklist failed, please check files and extensions')
-                    print('Pipeline _RUN Aborted')
-                
+
         except Exception as err:
             print('Exception encountered Force closing the thread! Err:', err)
         print('Why not ending...?')

@@ -2,10 +2,12 @@
 
 from colorama import init, Fore, Back, Style
 
-import interface_cli
+import interface.interface_cli as interface_cli
 import app_conf
 
 from process_pipeline.main_pipeline import MainPipeline
+
+from interface.UI.tkinter_test import TK_UI
 
 from control_plane.ctrl_main import CtrlMain
 
@@ -19,7 +21,7 @@ class lex_lit:
         # things to do first..
 
         self.ctrl_plane = CtrlMain()
-        
+        self.tk_ui = TK_UI()
 
 
 
@@ -34,9 +36,11 @@ class lex_lit:
         # MainPipeline()._RUN()
 
 
-        self.ctrl_plane.main_ctrl()
+        self.tk_ui.start_layout()
 
-        self.ctrl_plane.another_ctrl()
+        #self.ctrl_plane.main_ctrl()
+
+        #self.ctrl_plane.another_ctrl()
         
 
 
