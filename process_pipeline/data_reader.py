@@ -53,7 +53,7 @@ class data_tsv_read():
     def lexique_loader_tsv_backup(
             self, filename_path: str | bytes | os.PathLike, 
             read_limit: int = 0
-            ) -> list[dict]:      
+            ) -> list[dict]:
         arr_words = []      # Temp storage of found words
         word_seen = set()   # For duplicate checking
 
