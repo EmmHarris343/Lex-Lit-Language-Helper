@@ -20,8 +20,7 @@ class lex_lit:
         self.app_main()
 
     def app_main(self):
-        print('Startup')
-        print(Fore.LIGHTGREEN_EX + "Yo / Wesh - Startup!" + Fore.RESET)
+        print(Fore.LIGHTGREEN_EX + "Startup" + Fore.RESET)
 
         MainPipeline()._RUN()
 

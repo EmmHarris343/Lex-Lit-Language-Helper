@@ -1,43 +1,33 @@
-## 🗯️ TL;DR
-Take common words found in books / films. To provide example sentences with those words used.
+## What this does
+This app can either: Use a lexicon of high frequency words in a language, or can use a keyword to find example sentences with those words.
 
-## Longer Version:
-This app can either: Use a lexicon of high frequency words in a language, to find example sentences with those words. 
+This uses lexicons / datasets from: http://www.lexique.org/ (Not included):  
+***Has word frequency, noun, verb, gender and a lot of neat and useful information***
+    
 
-Or, it can be used to find a keyword, then find an example sentence with the word used.
+Uses datasets from: https://tatoeba.org/en (Not included):  
+***Provides a list of sentences to see how words might actually be used.***
 
-This uses lexicons / datasets from: http://www.lexique.org/ (Not included):
-- Has a rating system of the most used or common words.
-- Can provide extra data for noun, verb, gender, and other.
+### 🛠️ Howto Use (Ish):  
+- [x] Download a sentence set from https://tatoeba.org/en
+- [x] Download the word list from http://www.lexique.org/
+- [x] Rename file names, or adjust setting (see app_conf)
+- [x] Adjustable settings, word frequency, and a lot more (see app_conf)
+- [x] run `python3 app.py` | use VS code debugger
 
-Uses datasets from: https://tatoeba.org/en (Not included):
-- Provide list of sentences (Commonly used in books, movies, series)
-- Can use list of sentences to provide example word use cases.
-
-
-### 🛠️ Howto Use (Ish):
- - [X] Download a sentence set from https://tatoeba.org/en
- - [X] Download the word list from http://www.lexique.org/
- - [X] Rename file names, or adjust setting (see app_conf)
- - [X] Adjustable settings, word frequency, and a lot more (see app_conf)
- - [X] run `python3 app.py` | use VS code debugger
-
-#### 🏆 GOAL:
+#### 🏆 GOAL:  
 - To help somewhat with the language learning process, specifically word acquisition.
-- Provide a search by use frequency in a language. 
-- Provide easy to read sentences with example of words
-- Allow for basic word serach
-- Hope to add more advanced search, to find different conjugated versions of words.
+- Provide a search by keyword, or frequency in a language. 
+- Provide easy to read sentences with example of words.
 
 #### Would-be-nice:
 - More usibility, better search, easier to navigate.
-- Speed improvements.
-- Increased scope. Add user profiles, track which words user remembers, or others that need more practice.
-- Maybe move away from CLI *That may never happen.
+- Increase scope, better features, user profiles.
+- Speed improvements. Maybe move away from CLI.
 
 #### 💣 To note 💣
 - Purely side project, not fully functional, has bugs.
-- More proof on concept in it's current state.
+- More proof of concept in it's current state.
 - Not tested on Windows.
 
 

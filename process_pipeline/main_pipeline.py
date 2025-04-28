@@ -24,7 +24,7 @@ class MainPipeline():
         self.conf = conf
 
         self.tsv_loader = data_tsv_read()
-        self.lex_transform = LexTransform()       
+        self.lex_transform = LexTransform()
         self.sentence_compilier = CompileData()
         
         self.loaded_lexique:list[dict] = None
